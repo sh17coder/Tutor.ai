@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIDYORA AI - Your Personal Learning Assistant</title>
+    <title>AI Tutor - Your Personal Learning Assistant</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -528,15 +528,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 
     <script>
-        // Firebase Configuration (Replace with your config)
+        // ✅ FIREBASE CONFIGURED: Your Vidyora AI Project
         const firebaseConfig = {
-  apiKey: "AIzaSyAyFhDG_biaRbUGenWjF3MUB2UeCkSLFWs",
-  authDomain: "vidyora-ai.firebaseapp.com",
-  projectId: "vidyora-ai",
-  storageBucket: "vidyora-ai.firebasestorage.app",
-  messagingSenderId: "56554502831",
-  appId: "1:56554502831:web:a2c266bec3b35b9ae8b25a"
-};
+            apiKey: "AIzaSyAyFhDG_biaRbUGenWjF3MUB2UeCkSLFWs",
+            authDomain: "vidyora-ai.firebaseapp.com",
+            projectId: "vidyora-ai",
+            storageBucket: "vidyora-ai.firebasestorage.app",
+            messagingSenderId: "56554502831",
+            appId: "1:56554502831:web:a2c266bec3b35b9ae8b25a"
+        };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -548,9 +548,27 @@
         let isAuthMode = 'login';
         let chatHistory = [];
 
-        // Free LLM API Configuration (Using Hugging Face Inference API)
-        const LLM_API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
-        const LLM_API_KEY = "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"; // Get free token from huggingface.co
+        // ✅ CONFIGURED: Hugging Face API Ready!
+        
+        // Option 1: Hugging Face (Recommended - Free & Easy)
+        const API_CONFIG = {
+            provider: 'huggingface',
+            url: "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+            key: "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", // ✅ Your Hugging Face token is configured
+            model: "microsoft/DialoGPT-medium"
+        };
+
+        // Option 2: OpenAI (Uncomment and replace key to use)
+        /*
+        const API_CONFIG = {
+            provider: 'openai',
+            url: "https://api.openai.com/v1/chat/completions",
+            key: "REPLACE_WITH_YOUR_OPENAI_KEY", // ⚠️ Replace with your OpenAI key
+            model: "gpt-3.5-turbo"
+        };
+        */
+
+        // 🚨 IMPORTANT: You MUST replace the key above with your real token!
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -814,61 +832,110 @@
         }
 
         async function callLLMAPI(prompt) {
-            // This is a placeholder - replace with actual free LLM API call
-            // Example with Hugging Face Inference API:
-            /*
-            try {
-                const response = await fetch(LLM_API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${LLM_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        inputs: prompt,
-                        parameters: {
-                            max_new_tokens: 200,
-                            temperature: 0.7
-                        }
-                    })
-                });
-                
-                const data = await response.json();
-                return data.generated_text || data[0]?.generated_text || "I'm here to help you learn!";
-            } catch (error) {
-                throw error;
+            // ⚠️ Check if API key is properly configured
+            if (!API_CONFIG.key || API_CONFIG.key.includes("REPLACE_WITH") || API_CONFIG.key.includes("your_token_here")) {
+                return "🔧 Setup Required: Please replace the API_CONFIG.key in the code with your actual API token. See the comments above for instructions!";
             }
-            */
 
-            // Temporary educational responses for demo
-            const educationalResponses = {
-                'math': [
-                    "Let me break this down step by step. First, let's identify what we know and what we need to find...",
-                    "Great question! In mathematics, it's important to understand the underlying concept. Let me explain...",
-                    "This is a common type of problem. The key is to remember the fundamental principle..."
-                ],
-                'science': [
-                    "That's a fascinating topic in science! Let me explain how this works...",
-                    "This concept is fundamental to understanding how the natural world operates...",
-                    "Science helps us understand cause and effect. In this case..."
-                ],
-                'english': [
-                    "Language is beautiful and complex. Let me help you understand this concept...",
-                    "This is an important aspect of English. Let's explore it together...",
-                    "Communication is key, and understanding this will improve your skills..."
-                ]
-            };
-
-            // Simple delay to simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-            const responses = educationalResponses[currentSubject] || [
-                "That's a great question! Let me help you understand this concept...",
-                "I'm here to help you learn. Let me explain this step by step...",
-                "Learning is a journey, and I'm here to guide you through it..."
-            ];
-
-            return responses[Math.floor(Math.random() * responses.length)] + " (Note: Connect a real LLM API for full functionality)";
+            try {
+                let response;
+                
+                switch(API_CONFIG.provider) {
+                    case 'huggingface':
+                        response = await fetch(API_CONFIG.url, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${API_CONFIG.key}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                inputs: prompt,
+                                parameters: {
+                                    max_new_tokens: 150,
+                                    temperature: 0.7,
+                                    return_full_text: false
+                                }
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`API Error: ${response.status} - Check your Hugging Face token`);
+                        }
+                        
+                        const hfData = await response.json();
+                        return hfData[0]?.generated_text || hfData.generated_text || "I'm here to help you learn!";
+                    
+                    case 'openai':
+                        response = await fetch(API_CONFIG.url, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${API_CONFIG.key}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                model: API_CONFIG.model,
+                                messages: [
+                                    {
+                                        role: "system", 
+                                        content: `You are a helpful AI tutor specializing in ${currentSubject}. Provide clear, educational explanations suitable for students.`
+                                    },
+                                    {
+                                        role: "user", 
+                                        content: prompt
+                                    }
+                                ],
+                                max_tokens: 150,
+                                temperature: 0.7
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`API Error: ${response.status} - Check your OpenAI key`);
+                        }
+                        
+                        const openaiData = await response.json();
+                        return openaiData.choices[0]?.message?.content || "I'm here to help you learn!";
+                    
+                    case 'google':
+                        response = await fetch(`${API_CONFIG.url}?key=${API_CONFIG.key}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{
+                                        text: `You are an AI tutor for ${currentSubject}. ${prompt}`
+                                    }]
+                                }]
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`API Error: ${response.status} - Check your Google AI key`);
+                        }
+                        
+                        const googleData = await response.json();
+                        return googleData.candidates[0]?.content?.parts[0]?.text || "I'm here to help you learn!";
+                    
+                    default:
+                        throw new Error('Invalid API provider');
+                }
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                
+                // Show specific error messages
+                if (error.message.includes('401') || error.message.includes('403')) {
+                    return "🔑 Authentication Error: Your API key is invalid. Please check and update your token.";
+                } else if (error.message.includes('429')) {
+                    return "⏱️ Rate Limit: Too many requests. Please wait a moment and try again.";
+                } else if (error.message.includes('Network')) {
+                    return "🌐 Network Error: Please check your internet connection.";
+                }
+                
+                return `❌ Error: ${error.message}`;
+            }
         }
 
         // Close modal when clicking outside
@@ -948,4 +1015,4 @@
         };
     </script>
 </body>
-                    </html>
+    </html>
